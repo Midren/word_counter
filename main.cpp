@@ -1,6 +1,4 @@
 #include "zip.h"
-#include<string>
-#include "concurent_queue.h"
 
 int main() {
     ConcurrentQueue<std::string> my_queue;
