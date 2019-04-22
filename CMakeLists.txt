@@ -8,7 +8,7 @@ set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREAD ON)
 find_package(Boost REQUIRED COMPONENTS locale filesystem system)
 
-add_executable(parallel_reading main.cpp zip.cpp)
+add_executable(parallel_reading main.cpp zip.cpp concurent_queue.cpp concurent_queue.h)
 add_executable(single_thread single_thread.cpp)
 add_executable(multiple_threads multiple_threads.cpp)
 
