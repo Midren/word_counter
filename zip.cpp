@@ -4,8 +4,7 @@
 
 #include "zip.h"
 
-int copy_data(struct archive *ar, struct archive *aw)
-{
+int copy_data(struct archive *ar, struct archive *aw) {
     int r;
     const void *buff;
     size_t size;
@@ -26,13 +25,13 @@ int copy_data(struct archive *ar, struct archive *aw)
 
 bool Zip::unzip(std::string zipFile, std::string ExtractPath) {
     boost::filesystem::path zip(zipFile);
-    if(boost::filesystem::exists(zip)){
+    if (boost::filesystem::exists(zip)) {
         boost::filesystem::path path(ExtractPath);
         boost::filesystem::path currentDir = boost::filesystem::current_path();
         struct archive *a;
         struct archive *ext;
         struct archive_entry *entry;
-        int flags =  ARCHIVE_EXTRACT_TIME;
+        int flags = ARCHIVE_EXTRACT_TIME;
         int r;
 
         a = archive_read_new();
@@ -50,7 +49,7 @@ bool Zip::unzip(std::string zipFile, std::string ExtractPath) {
                 break;
             if (r < ARCHIVE_OK || r < ARCHIVE_WARN)
                 return false;
-            if(boost::filesystem::exists(path) && boost::filesystem::is_directory(path)){
+            if (boost::filesystem::exists(path) && boost::filesystem::is_directory(path)) {
                 std::string newPath = path.string() + "/" + std::string(archive_entry_pathname(entry));
                 archive_entry_set_pathname(entry, newPath.c_str());
             }
