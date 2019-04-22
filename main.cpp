@@ -1,7 +1,6 @@
-#include <iostream>
-#include <archive.h>
-#include <archive_entry.h>
+#include "zip.h"
 
 int main() {
+//    Zip::unzip("./data/data.zip", "./");
     return 0;
 }
