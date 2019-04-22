@@ -25,7 +25,7 @@ std::vector<std::string> split_to_words(std::string &data) {
     return words_vec;
 }
 
-std::map<std::string, size_t> count_words(std::vector<std::string> words_vec) {
+std::map<std::string, size_t> count_words(std::vector<std::string> &words_vec) {
     std::map<std::string, size_t> words_counter;
     for (auto &&w: words_vec) {
         words_counter[w] += 1;
@@ -42,6 +42,6 @@ int main() {
     auto words_counter = count_words(words_vec);
 
     for (auto x: words_counter) {
-        fout << x.first << " \t:\t" << x.second << std::endl;
+        fout << x.first << "\t:\t" << x.second << std::endl;
     }
 }
