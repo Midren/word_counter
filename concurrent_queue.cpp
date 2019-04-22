@@ -1,9 +1,7 @@
-//
-
-#include "concurent_queue.h"
+#include "concurrent_queue.h"
 
 
-template<typename T>
+template<class T>
 void ConcurrentQueue<T>::push(T element) {
     std::unique_lock<std::mutex> locker(deque_mutex);
     data.push_back(element);
@@ -11,13 +9,15 @@ void ConcurrentQueue<T>::push(T element) {
     queue_check.notify_one();
 }
 
-template<typename T>
+
+template<class T>
 T ConcurrentQueue<T>::pop() {
     std::unique_lock<std::mutex> locker(deque_mutex);
     while (!notified) {
         queue_check.wait(locker);
     }
-    T a = data.pop_front();
+    T a = data.front();
+    data.pop_front();
     notified = false;
     return a;
 }
