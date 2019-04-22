@@ -1,9 +1,34 @@
 #include <fstream>
+#include <vector>
 #include <string>
 #include <map>
 
 #include "concurrent_queue.h"
+
+#include "boost/locale/boundary.hpp"
+#include "boost/locale.hpp"
 #include "utils.h"
+
+namespace ba=boost::locale::boundary;
+
+void split_to_words(std::string &data, ConcurrentQueue<std::vector<std::string>> &words_queue) {
+    boost::locale::generator gen;
+    std::locale::global(gen("en_US.UTF-8"));
+
+    std::vector<std::string> words_vec;
+    ba::ssegment_index words(ba::word, data.begin(), data.end());
+
+    for (auto &&x: words) {
+        std::string s = boost::locale::fold_case(boost::locale::normalize(x.str()));
+        if (s.length() > 1 && any_str(s)) {
+            words_vec.push_back(move(s));
+            if (words_vec.size() == 1024) {
+                words_queue.push(words_vec);
+                words_vec.clear();
+            }
+        }
+    }
+}
 
 void count_words(ConcurrentQueue<std::vector<std::string>> &words_queue,
                  ConcurrentQueue<std::map<std::string, size_t>> &map_queue) {

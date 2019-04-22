@@ -13,7 +13,7 @@ static std::map<std::string, size_t> count_words(std::vector<std::string> &words
 }
 
 int main() {
-    std::ifstream fin("../data_1/data_1.txt", std::ifstream::binary);
+    std::ifstream fin("../data/data.txt", std::ifstream::binary);
     std::ofstream fout("result.txt");
     std::string data = static_cast<std::ostringstream &>(std::ostringstream{} << fin.rdbuf()).str();
 
