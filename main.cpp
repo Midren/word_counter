@@ -1,8 +1,8 @@
-#include "zip.h"
+//#include "zip.h"
+#include "concurrent_queue.h"
+#include <thread>
+#include <vector>
 
 int main() {
-    ConcurrentQueue<std::string> my_queue;
-    my_queue.push(std::string("abc"));
-    std::cout << my_queue.pop() << std::endl;
     return 0;
 }

@@ -12,7 +12,6 @@ private:
     std::deque<T> data;
     std::condition_variable queue_check;
     std::mutex deque_mutex;
-    bool notified{};
 public:
     ConcurrentQueue() = default;
 
