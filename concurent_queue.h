@@ -10,13 +10,13 @@
 #include<condition_variable>
 #include<mutex>
 
-template<class T>
+template<typename T>
 class ConcurrentQueue {
 private:
     std::deque<T> data;
     std::condition_variable queue_check;
     std::mutex deque_mutex;
-    bool notified;
+    bool notified{};
 public:
     ConcurrentQueue() = default;
     void push(T element);

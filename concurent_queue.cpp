@@ -3,7 +3,7 @@
 #include "concurent_queue.h"
 
 
-template<class T>
+template<typename T>
 void ConcurrentQueue<T>::push(T element) {
     std::unique_lock<std::mutex> locker(deque_mutex);
     data.push_back(element);
@@ -11,12 +11,13 @@ void ConcurrentQueue<T>::push(T element) {
     queue_check.notify_one();
 }
 
-template<class T>
+template<typename T>
 T ConcurrentQueue<T>::pop() {
     std::unique_lock<std::mutex> locker(deque_mutex);
     while (!notified) {
         queue_check.wait(locker);
     }
+    T a = data.pop_front();
     notified = false;
-    return data.pop_front();
+    return a;
 }
