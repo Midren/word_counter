@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.14)
 project(parallel_reading)
 
 set(CMAKE_CXX_STANDARD 14)
@@ -9,7 +9,6 @@ set(Boost_USE_MULTITHREAD ON)
 find_package(Boost REQUIRED COMPONENTS locale filesystem system)
 
 add_executable(parallel_reading main.cpp zip.cpp)
-
 add_executable(single_thread single_thread.cpp)
 add_executable(multiple_threads multiple_threads.cpp)
 
