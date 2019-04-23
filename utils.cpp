@@ -9,8 +9,8 @@ std::string get_file_ext(std::string file_name) {
 
 std::string check_input(const std::string &file_path) {
     std::string my_txt;
-    boost::filesystem::path input(my_txt);
-    if(boost::filesystem::exists(input)) {
+    boost::filesystem::path input(file_path);
+    if (boost::filesystem::exists(input)) {
         std::string extension = get_file_ext(file_path);
         if (extension == "txt") {
             my_txt = file_path;
@@ -26,6 +26,7 @@ std::string check_input(const std::string &file_path) {
         std::ifstream fin(my_txt, std::ifstream::binary);
         std::string data = static_cast<std::ostringstream &>(std::ostringstream{} << fin.rdbuf()).str();
         return data;
+    } else {
+        throw std::runtime_error("No file for input!");
     }
-    throw std::runtime_error("No file for input!");
 }

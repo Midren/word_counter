@@ -4,12 +4,13 @@ if [ "$#" -ne 5 ]; then
     echo "Example of usage:"
     echo "./itos_exp <number of repetitions> <path single thread exe> <path multithread exe> <path to file> <number of threads>"
 else
+    printf "infile=$4\nout_by_a=res_a.txt\nout_by_n=res_n.txt\nthreads=1\n" > config.dat
+    ./$2 config.dat > etalon_a.txt
+    mv res_a.txt etalon_a.txt
+    mv res_n.txt etalon_n.txt
     for thread in `seq 1 $5`;
     do
         printf "infile=$4\nout_by_a=res_a.txt\nout_by_n=res_n.txt\nthreads=$thread\n" > config.dat
-        ./$3 config.dat > etalon_a.txt
-        mv res_a.txt etalon_a.txt
-        mv res_n.txt etalon_n.txt
         gt=10000000
         for i in `seq 1 $1`;
         do

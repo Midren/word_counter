@@ -157,6 +157,7 @@ int main(int argc, char *argv[]) {
     }
 
     std::vector<std::pair<std::string, size_t>> tmp;
+    tmp.reserve(res.size());
     for (auto x: res) {
         tmp.emplace_back(x.first, x.second);
     }

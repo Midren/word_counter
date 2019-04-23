@@ -71,7 +71,7 @@ bool Zip::unzip(std::string zipFile, std::string ExtractPath) {
         boost::filesystem::current_path(currentDir);
         return true;
     }
-    throw std::invalid_argument("No such path");
+    throw std::invalid_argument("There is no path for the file to unzip!");
 }
 
 std::vector<std::string> Zip::list_items(const char *file_path) {
