@@ -9,7 +9,6 @@
 
 #include "concurrent_queue.h"
 #include "utils.h"
-
 #include "boost/locale/boundary.hpp"
 #include "boost/locale.hpp"
 
@@ -116,9 +115,9 @@ int main() {
     wMap count;
 
     auto start_reading = get_current_wall_time_fenced();
-    std::ifstream fin(a->infile, std::ifstream::binary);
     std::cout << a->infile << std::endl;
-    std::string data = static_cast<std::ostringstream>(std::ostringstream{} << fin.rdbuf()).str();
+    std::string data = check_input(a->infile);
+    std::cout << data.size() << std::endl;
     auto end_reading = get_current_wall_time_fenced();
 
     int thread_num = std::stoi(a->NThreads);
@@ -140,7 +139,7 @@ int main() {
         threads[i] = std::thread(merge_maps, std::ref(map_queue));
     }
 
-    map_queue.push(wMap{});
+    map_queue.push(wMap {});
     for (int i = 0; i < thread_num; i++) {
         threads[i].join();
     }
