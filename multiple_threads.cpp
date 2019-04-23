@@ -71,17 +71,16 @@ void count_words(ConcurrentQueue<std::vector<std::string>> &words_queue,
 void merge_maps(ConcurrentQueue<wMap> &queue) {
     wMap fst, snd;
     for (;;) {
-         std::cout << queue.size() << std::endl;
-        fst = queue.pop();
-        snd = queue.pop();
+        std::cout << queue.size() << std::endl;
+        auto tmp = queue.double_pop();
+        fst = tmp.first;
+        snd = tmp.second;
         if (fst.empty() || snd.empty()) {
             if (queue.size() == 0) {
-                queue.push(fst);
-                queue.push(snd);
+                queue.double_push(fst, snd);
                 break;
             } else {
-                queue.push(fst);
-                queue.push(snd);
+                queue.double_push(fst, snd);
                 continue;
             }
         }
