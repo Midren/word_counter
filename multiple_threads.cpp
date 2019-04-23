@@ -160,10 +160,21 @@ int main(int argc, char *argv[]) {
     for (auto x: res) {
         tmp.emplace_back(x.first, x.second);
     }
-    std::ofstream fout(a->out_by_a);
+    std::sort(tmp.begin(), tmp.end(), [](auto x, auto y) {
+        return x.first < y.first;
+    });
+    std::ofstream fout1(a->out_by_a);
     std::cout << a->out_by_a << std::endl;
     for (auto x: tmp) {
-        fout << x.first << "\t:\t" << x.second << std::endl;
+        fout1 << x.first << "\t:\t" << x.second << std::endl;
+    }
+    std::sort(tmp.begin(), tmp.end(), [](auto x, auto y) {
+        return x.second < y.second;
+    });
+    std::ofstream fout2(a->out_by_n);
+    std::cout << a->out_by_a << std::endl;
+    for (auto x: tmp) {
+        fout2 << x.first << "\t:\t" << x.second << std::endl;
     }
     auto end_writing = get_current_wall_time_fenced();
 
