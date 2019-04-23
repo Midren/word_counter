@@ -3,6 +3,8 @@
 #include <fstream>
 #include <chrono>
 
+#include "config_parser.h"
+
 #include "boost/locale/boundary.hpp"
 #include "boost/locale.hpp"
 
@@ -56,7 +58,15 @@ inline uint64_t to_us(const D &d) {
     return std::chrono::duration_cast<std::chrono::milliseconds>(d).count();
 }
 
-int main() {
+int main(int argc, char *argv[]) {
+    Attributes *a;
+    if (argc < 2)
+        a = get_intArgs("config.dat");
+    else if (argc == 2) {
+        a = get_intArgs(argv[1]);
+    } else {
+        std::cout << "Invalid input: ./multiple_threads <path to config>" << std::endl;
+    }
     auto start_reading = get_current_wall_time_fenced();
     std::ifstream fin("../data/data.txt", std::ifstream::binary);
     std::string data = static_cast<std::ostringstream &>(std::ostringstream{} << fin.rdbuf()).str();
@@ -68,12 +78,27 @@ int main() {
     auto end_counting = get_current_wall_time_fenced();
 
     std::ofstream fout("result.txt");
+    std::vector<std::pair<std::string, size_t>> tmp;
     for (auto x: words_counter) {
-        fout << x.first << "\t:\t" << x.second << std::endl;
+        tmp.emplace_back(x.first, x.second);
+    }
+    std::sort(tmp.begin(), tmp.end(), [](auto x, auto y) {
+        return x.first < y.first;
+    });
+    std::ofstream fout1(a->out_by_a);
+    for (auto x: tmp) {
+        fout1 << x.first << "\t:\t" << x.second << std::endl;
+    }
+    std::sort(tmp.begin(), tmp.end(), [](auto x, auto y) {
+        return x.second > y.second;
+    });
+    std::ofstream fout2(a->out_by_n);
+    for (auto x: tmp) {
+        fout2 << x.first << "\t:\t" << x.second << std::endl;
     }
     auto end_writing = get_current_wall_time_fenced();
 
-    std::cout << "Loading: " << to_us(end_reading - start_reading) << std::endl
+    std::cout << "Total: " << to_us(end_writing - start_reading) << std::endl
               << "Analyzing: " << to_us(end_counting - start_counting) << std::endl
-              << "Total: " << to_us(end_writing - start_reading) << std::endl;
+              << "Loading: " << to_us(end_reading - start_reading) << std::endl;
 }
