@@ -4,12 +4,21 @@
 #include <map>
 #include <cmath>
 #include <thread>
+#include <unordered_map>
+#include "config_parser.h"
 
 #include "concurrent_queue.h"
 #include "utils.h"
 
 #include "boost/locale/boundary.hpp"
 #include "boost/locale.hpp"
+
+#define MAP 1
+#ifdef MAP
+typedef std::map<std::string, size_t> wMap;
+#else
+typedef std::unordered_map<std::string, size_t> wMap;
+#endif
 
 bool any_str(const std::string &str) {
     size_t num = 0;
@@ -41,7 +50,7 @@ void split_to_words(std::string &data, ConcurrentQueue<std::vector<std::string>>
 }
 
 void count_words(ConcurrentQueue<std::vector<std::string>> &words_queue,
-                 ConcurrentQueue<std::map<std::string, size_t>> &map_queue) {
+                 ConcurrentQueue<wMap> &map_queue) {
     std::vector<std::string> words;
     for (;;) {
         words = words_queue.pop();
@@ -49,7 +58,7 @@ void count_words(ConcurrentQueue<std::vector<std::string>> &words_queue,
             words_queue.push(words);
             return;
         }
-        std::map<std::string, size_t> cnt;
+        wMap cnt;
         for (auto &word: words) {
             std::string s = boost::locale::fold_case(boost::locale::normalize(word));
             if (s.length() >= 1 && any_str(s)) {
@@ -60,7 +69,7 @@ void count_words(ConcurrentQueue<std::vector<std::string>> &words_queue,
     }
 }
 
-void merge_maps(ConcurrentQueue<std::map<std::string, size_t>> &queue) {
+void merge_maps(ConcurrentQueue<wMap> &queue) {
     std::map<std::string, size_t> fst, snd;
     for (;;) {
         fst = queue.pop();
@@ -101,16 +110,16 @@ inline uint64_t to_us(const D &d) {
 
 
 int main() {
+    auto a = get_intArgs("../config.dat");
     ConcurrentQueue<std::vector<std::string>> words_queue;
-    ConcurrentQueue<std::map<std::string, size_t >> map_queue;
+    ConcurrentQueue<wMap> map_queue;
     std::map<std::string, size_t> count;
 
     auto start_reading = get_current_wall_time_fenced();
-    std::string file = "./data/data.txt";
-    std::string data = check_input(file);
+    std::string data = check_input(a->infile);
     auto end_reading = get_current_wall_time_fenced();
 
-    constexpr int thread_num = 1;
+    int thread_num = std::stoi(a->NThreads);
     int merge_threads_num = std::floor(thread_num / 4.0);
     std::vector<std::thread> threads(thread_num);
 
@@ -121,14 +130,14 @@ int main() {
 
     auto start_counting = get_current_wall_time_fenced();
     split_to_words(data, words_queue);
-    words_queue.push(std::vector<std::string>());
 
+    words_queue.push(std::vector<std::string>());
     for (int i = 0; i < thread_num - merge_threads_num; i++) {
         threads[i].join();
         threads[i] = std::thread(merge_maps, std::ref(map_queue));
     }
 
-    map_queue.push(std::map<std::string, size_t>{});
+    map_queue.push(wMap{});
     for (int i = 0; i < thread_num; i++) {
         threads[i].join();
     }
@@ -140,7 +149,7 @@ int main() {
         res = map_queue.pop();
     }
 
-    std::ofstream fout("result.txt");
+    std::ofstream fout(a->out_by_a);
     for (auto x: res) {
         fout << x.first << "\t:\t" << x.second << std::endl;
     }
