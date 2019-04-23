@@ -70,7 +70,7 @@ void count_words(ConcurrentQueue<std::vector<std::string>> &words_queue,
 }
 
 void merge_maps(ConcurrentQueue<wMap> &queue) {
-    std::map<std::string, size_t> fst, snd;
+    wMap fst, snd;
     for (;;) {
         fst = queue.pop();
         snd = queue.pop();
@@ -113,13 +113,16 @@ int main() {
     auto a = get_intArgs("../config.dat");
     ConcurrentQueue<std::vector<std::string>> words_queue;
     ConcurrentQueue<wMap> map_queue;
-    std::map<std::string, size_t> count;
+    wMap count;
 
     auto start_reading = get_current_wall_time_fenced();
-    std::string data = check_input(a->infile);
+    std::ifstream fin(a->infile, std::ifstream::binary);
+    std::cout << a->infile << std::endl;
+    std::string data = static_cast<std::ostringstream>(std::ostringstream{} << fin.rdbuf()).str();
     auto end_reading = get_current_wall_time_fenced();
 
     int thread_num = std::stoi(a->NThreads);
+    std::cout << a->NThreads << std::endl;
     int merge_threads_num = std::floor(thread_num / 4.0);
     std::vector<std::thread> threads(thread_num);
 
@@ -150,6 +153,7 @@ int main() {
     }
 
     std::ofstream fout(a->out_by_a);
+    std::cout << a->out_by_a << std::endl;
     for (auto x: res) {
         fout << x.first << "\t:\t" << x.second << std::endl;
     }
