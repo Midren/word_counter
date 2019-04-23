@@ -10,7 +10,7 @@ find_package(Boost REQUIRED COMPONENTS locale filesystem system)
 find_package(Threads REQUIRED)
 
 add_executable(parallel_reading main.cpp zip.cpp)
-add_executable(single_thread single_thread.cpp utils.cpp)
+add_executable(single_thread single_thread.cpp)
 add_executable(multiple_threads multiple_threads.cpp utils.cpp zip.cpp)
 
 target_link_libraries(parallel_reading LINK_PUBLIC ${LibArchive_LIBRARIES} ${Boost_LIBRARIES})

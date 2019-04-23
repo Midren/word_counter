@@ -6,6 +6,7 @@
 #include <fstream>
 #include "zip.h"
 #include <map>
+#include <sstream>
 #include <boost/algorithm/string.hpp>
 
 std::string check_input(const std::string &file_name);

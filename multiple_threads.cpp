@@ -103,14 +103,14 @@ inline uint64_t to_us(const D &d) {
 int main() {
     ConcurrentQueue<std::vector<std::string>> words_queue;
     ConcurrentQueue<std::map<std::string, size_t >> map_queue;
-
     std::map<std::string, size_t> count;
+
     auto start_reading = get_current_wall_time_fenced();
-    std::string file = "../data/data.tar";
-    std::string data = check_input(file);
+    std::ifstream fin("../data/data.txt", std::ifstream::binary);
+    std::string data = static_cast<std::ostringstream &>(std::ostringstream{} << fin.rdbuf()).str();
     auto end_reading = get_current_wall_time_fenced();
 
-    constexpr int thread_num = 7;
+    constexpr int thread_num = 4;
     int merge_threads_num = std::floor(thread_num / 4.0);
     std::vector<std::thread> threads(thread_num);
 
@@ -125,10 +125,10 @@ int main() {
 
     for (int i = 0; i < thread_num - merge_threads_num; i++) {
         threads[i].join();
-//        threads[i] = std::thread(merge_maps, std::ref(map_queue));
+        threads[i] = std::thread(merge_maps, std::ref(map_queue));
     }
     map_queue.push(std::map<std::string, size_t>{});
-    for (int i = thread_num - merge_threads_num; i < thread_num; i++) {
+    for (int i = 0; i < thread_num; i++) {
         threads[i].join();
     }
     auto end_counting = get_current_wall_time_fenced();
@@ -140,7 +140,7 @@ int main() {
     }
 
     std::ofstream fout("result.txt");
-    for (const auto &x: res) {
+    for (auto x: res) {
         fout << x.first << "\t:\t" << x.second << std::endl;
     }
     auto end_writing = get_current_wall_time_fenced();
