@@ -11,8 +11,8 @@ void ConcurrentQueue<T>::push(T element) {
 template<class T>
 T ConcurrentQueue<T>::pop() {
     std::unique_lock<std::mutex> locker(deque_mutex);
-    queue_check.wait(locker, [this]{return !data.empty();});
-    T a = data.front();
+    queue_check.wait(locker, [this] { return !data.empty(); });
+    T a = std::move(data.front());
     data.pop_front();
-    return a ;
+    return a;
 }
