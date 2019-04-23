@@ -6,6 +6,7 @@
 #include <thread>
 
 #include "concurrent_queue.h"
+#include "utils.h"
 
 #include "boost/locale/boundary.hpp"
 #include "boost/locale.hpp"
@@ -102,11 +103,11 @@ inline uint64_t to_us(const D &d) {
 int main() {
     ConcurrentQueue<std::vector<std::string>> words_queue;
     ConcurrentQueue<std::map<std::string, size_t >> map_queue;
-    std::map<std::string, size_t> count;
 
+    std::map<std::string, size_t> count;
     auto start_reading = get_current_wall_time_fenced();
-    std::ifstream fin("../data/data.txt", std::ifstream::binary);
-    std::string data = static_cast<std::ostringstream &>(std::ostringstream{} << fin.rdbuf()).str();
+    std::string file = "../data/data.tar";
+    std::string data = check_input(file);
     auto end_reading = get_current_wall_time_fenced();
 
     constexpr int thread_num = 7;
@@ -139,7 +140,7 @@ int main() {
     }
 
     std::ofstream fout("result.txt");
-    for (auto x: res) {
+    for (const auto &x: res) {
         fout << x.first << "\t:\t" << x.second << std::endl;
     }
     auto end_writing = get_current_wall_time_fenced();

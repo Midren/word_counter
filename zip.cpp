@@ -41,7 +41,7 @@ bool Zip::unzip(std::string zipFile, std::string ExtractPath) {
         archive_write_disk_set_standard_lookup(ext);
         boost::filesystem::current_path(zip.parent_path());
         if ((r = archive_read_open_filename(a, zip.filename().c_str(), 10240)))
-            return false;
+            throw std::invalid_argument("Can`t open this type of archive");
         for (;;) {
             r = archive_read_next_header(a, &entry);
             if (r == ARCHIVE_EOF)
@@ -71,5 +71,26 @@ bool Zip::unzip(std::string zipFile, std::string ExtractPath) {
         boost::filesystem::current_path(currentDir);
         return true;
     }
-    return false;
+    throw std::invalid_argument("No such path");
+}
+
+std::vector<std::string> Zip::list_items(const char *file_path) {
+    std::vector<std::string> archive_files;
+    struct archive *a;
+    struct archive_entry *entry;
+    int r;
+
+    a = archive_read_new();
+    archive_read_support_format_all(a);
+    r = archive_read_open_filename(a, file_path, 10240);
+    if (r != ARCHIVE_OK)
+        throw std::invalid_argument("No such file or bad extension");
+    while (archive_read_next_header(a, &entry) == ARCHIVE_OK) {
+        archive_files.emplace_back(archive_entry_pathname(entry));
+        archive_read_data_skip(a);
+    }
+    r = archive_read_free(a);
+    if (r != ARCHIVE_OK)
+        throw std::runtime_error("Some this happen to archive");
+    return archive_files;
 }
