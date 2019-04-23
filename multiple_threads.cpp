@@ -109,10 +109,11 @@ inline uint64_t to_us(const D &d) {
 
 
 int main(int argc, char *argv[]) {
+    Attributes *a;
     if (argc < 2)
-        auto a = get_intArgs("config.dat");
-    else if (argc == 2){
-        auto a = get_intArgs(argv[1]);
+        a = get_intArgs("config.dat");
+    else if (argc == 2) {
+        a = get_intArgs(argv[1]);
     }
     ConcurrentQueue<std::vector<std::string>> words_queue;
     ConcurrentQueue<wMap> map_queue;
@@ -155,9 +156,13 @@ int main(int argc, char *argv[]) {
         res = map_queue.pop();
     }
 
+    std::vector<std::pair<std::string, size_t>> tmp;
+    for (auto x: res) {
+        tmp.emplace_back(x.first, x.second);
+    }
     std::ofstream fout(a->out_by_a);
     std::cout << a->out_by_a << std::endl;
-    for (auto x: res) {
+    for (auto x: tmp) {
         fout << x.first << "\t:\t" << x.second << std::endl;
     }
     auto end_writing = get_current_wall_time_fenced();

@@ -11,7 +11,7 @@ else
     gt=1000000
     for i in `seq 1 $1`;
     do
-        t=$(./$3)
+        t=$(./$3 config.dat)
         #res=$(diff -y res_a.txt etalon_a.txt)
         #if [ $? -ne 0 ]
         #then 
