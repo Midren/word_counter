@@ -106,11 +106,11 @@ int main() {
     std::map<std::string, size_t> count;
 
     auto start_reading = get_current_wall_time_fenced();
-    std::ifstream fin("../data/data.txt", std::ifstream::binary);
-    std::string data = static_cast<std::ostringstream &>(std::ostringstream{} << fin.rdbuf()).str();
+    std::string file = "./data/data.txt";
+    std::string data = check_input(file);
     auto end_reading = get_current_wall_time_fenced();
 
-    constexpr int thread_num = 2;
+    constexpr int thread_num = 1;
     int merge_threads_num = std::floor(thread_num / 4.0);
     std::vector<std::thread> threads(thread_num);
 
