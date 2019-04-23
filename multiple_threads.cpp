@@ -64,15 +64,15 @@ void merge_maps(ConcurrentQueue<std::map<std::string, size_t>> &queue) {
     std::map<std::string, size_t> fst, snd;
     for (;;) {
         fst = queue.pop();
-        if (fst.empty()) {
-            queue.push(fst);
-            return;
-        }
         snd = queue.pop();
-        if (snd.empty()) {
+        if (fst.empty() || snd.empty()) {
             queue.push(fst);
             queue.push(snd);
-            return;
+            if (queue.size() == 2) {
+                return;
+            } else {
+                continue;
+            }
         }
         for (auto &el : fst) {
             snd[el.first] += el.second;
@@ -110,7 +110,7 @@ int main() {
     std::string data = static_cast<std::ostringstream &>(std::ostringstream{} << fin.rdbuf()).str();
     auto end_reading = get_current_wall_time_fenced();
 
-    constexpr int thread_num = 4;
+    constexpr int thread_num = 2;
     int merge_threads_num = std::floor(thread_num / 4.0);
     std::vector<std::thread> threads(thread_num);
 
@@ -127,6 +127,7 @@ int main() {
         threads[i].join();
         threads[i] = std::thread(merge_maps, std::ref(map_queue));
     }
+
     map_queue.push(std::map<std::string, size_t>{});
     for (int i = 0; i < thread_num; i++) {
         threads[i].join();
