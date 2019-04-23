@@ -11,9 +11,12 @@ std::string check_input(const std::string &file_path) {
     std::string my_txt;
     std::cout << file_path << std::endl;
     std::string extension = get_file_ext(file_path);
+    std::cout << extension << std::endl;
     if (extension == "txt") {
         my_txt = file_path;
-    } else {
+        std::cout << file_path << std::endl;
+    }
+    else {
         Zip::unzip(file_path, "../");
         auto arch_items = Zip::list_items(file_path.c_str());
         for (const auto &item: arch_items)
