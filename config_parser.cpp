@@ -32,5 +32,6 @@ Attributes *get_intArgs(const std::string &filename) {
             throw std::invalid_argument("Invalid config argument!");
         }
     }
+    f.close();
     return attributes;
 }

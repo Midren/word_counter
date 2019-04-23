@@ -1,4 +1,4 @@
-infile= ../data/data.zip
+infile= ../data/data.txt
 out_by_a= res_a_z.txt
 out_by_n= res_n_z.txt
-threads=4
+threads= 4

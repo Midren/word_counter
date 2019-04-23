@@ -109,10 +109,12 @@ inline uint64_t to_us(const D &d) {
 
 
 int main(int argc, char *argv[]) {
-    if (argc < 2)
-        auto a = get_intArgs("config.dat");
-    else if (argc == 2){
-        auto a = get_intArgs(argv[1]);
+    Attributes *a;
+    if (argc < 2){
+        a = get_intArgs("../config.dat");
+    }
+    else{
+        a = get_intArgs(argv[1]);
     }
     ConcurrentQueue<std::vector<std::string>> words_queue;
     ConcurrentQueue<wMap> map_queue;
