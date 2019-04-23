@@ -71,14 +71,17 @@ void count_words(ConcurrentQueue<std::vector<std::string>> &words_queue,
 void merge_maps(ConcurrentQueue<wMap> &queue) {
     wMap fst, snd;
     for (;;) {
+         std::cout << queue.size() << std::endl;
         fst = queue.pop();
         snd = queue.pop();
         if (fst.empty() || snd.empty()) {
-            queue.push(fst);
-            queue.push(snd);
-            if (queue.size() == 2) {
-                return;
+            if (queue.size() == 0) {
+                queue.push(fst);
+                queue.push(snd);
+                break;
             } else {
+                queue.push(fst);
+                queue.push(snd);
                 continue;
             }
         }
@@ -87,6 +90,7 @@ void merge_maps(ConcurrentQueue<wMap> &queue) {
         }
         queue.push(snd);
     }
+    std::cout << "it is working (or not)" << std::endl;
 }
 
 #if defined _WIN32
@@ -110,10 +114,9 @@ inline uint64_t to_us(const D &d) {
 
 int main(int argc, char *argv[]) {
     Attributes *a;
-    if (argc < 2){
+    if (argc < 2) {
         a = get_intArgs("../config.dat");
-    }
-    else{
+    } else {
         a = get_intArgs(argv[1]);
     }
     ConcurrentQueue<std::vector<std::string>> words_queue;
@@ -121,13 +124,12 @@ int main(int argc, char *argv[]) {
     wMap count;
 
     auto start_reading = get_current_wall_time_fenced();
-    std::cout << a->infile << std::endl;
     std::string data = check_input(a->infile);
     std::cout << data.size() << std::endl;
     auto end_reading = get_current_wall_time_fenced();
 
     int thread_num = std::stoi(a->NThreads);
-    std::cout << a->NThreads << std::endl;
+
     int merge_threads_num = std::floor(thread_num / 4.0);
     std::vector<std::thread> threads(thread_num);
 
@@ -159,7 +161,7 @@ int main(int argc, char *argv[]) {
 
     std::ofstream fout(a->out_by_a);
     std::cout << a->out_by_a << std::endl;
-    for (auto x: res) {
+    for (const auto &x: res) {
         fout << x.first << "\t:\t" << x.second << std::endl;
     }
     auto end_writing = get_current_wall_time_fenced();

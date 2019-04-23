@@ -1,4 +1,4 @@
-infile= ../data/data.txt
+infile= /Users/admin/Desktop/POK/word_counter/data/data.zip
 out_by_a= res_a_z.txt
 out_by_n= res_n_z.txt
 threads= 4
