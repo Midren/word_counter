@@ -7,6 +7,7 @@
 
 #include "boost/locale/boundary.hpp"
 #include "boost/locale.hpp"
+#include "utils.h"
 
 namespace ba=boost::locale::boundary;
 
@@ -61,15 +62,16 @@ inline uint64_t to_us(const D &d) {
 int main(int argc, char *argv[]) {
     Attributes *a;
     if (argc < 2)
-        a = get_intArgs("config.dat");
+        a = get_intArgs("../config.dat");
     else if (argc == 2) {
         a = get_intArgs(argv[1]);
     } else {
-        std::cout << "Invalid input: ./multiple_threads <path to config>" << std::endl;
+        std::cerr << "Invalid input: ./multiple_threads <path to config>" << std::endl;
+        return -1;
     }
+    std::cout << a->infile << std::endl;
     auto start_reading = get_current_wall_time_fenced();
-    std::ifstream fin("../data/data.txt", std::ifstream::binary);
-    std::string data = static_cast<std::ostringstream &>(std::ostringstream{} << fin.rdbuf()).str();
+    std::string data = check_input(a->infile);
     auto end_reading = get_current_wall_time_fenced();
 
     auto start_counting = get_current_wall_time_fenced();
@@ -77,8 +79,8 @@ int main(int argc, char *argv[]) {
     auto words_counter = count_words(words_vec);
     auto end_counting = get_current_wall_time_fenced();
 
-    std::ofstream fout("result.txt");
     std::vector<std::pair<std::string, size_t>> tmp;
+    tmp.reserve(words_counter.size());
     for (auto x: words_counter) {
         tmp.emplace_back(x.first, x.second);
     }
@@ -86,7 +88,7 @@ int main(int argc, char *argv[]) {
         return x.first < y.first;
     });
     std::ofstream fout1(a->out_by_a);
-    for (auto x: tmp) {
+    for (const auto &x: tmp) {
         fout1 << x.first << "\t:\t" << x.second << std::endl;
     }
     std::sort(tmp.begin(), tmp.end(), [](auto x, auto y) {
