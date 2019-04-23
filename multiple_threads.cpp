@@ -9,7 +9,6 @@
 
 #include "concurrent_queue.h"
 #include "utils.h"
-
 #include "boost/locale/boundary.hpp"
 #include "boost/locale.hpp"
 
@@ -109,16 +108,20 @@ inline uint64_t to_us(const D &d) {
 }
 
 
-int main() {
-    auto a = get_intArgs("../config.dat");
+int main(int argc, char *argv[]) {
+    if (argc < 2)
+        auto a = get_intArgs("config.dat");
+    else if (argc == 2){
+        auto a = get_intArgs(argv[1]);
+    }
     ConcurrentQueue<std::vector<std::string>> words_queue;
     ConcurrentQueue<wMap> map_queue;
     wMap count;
 
     auto start_reading = get_current_wall_time_fenced();
-    std::ifstream fin(a->infile, std::ifstream::binary);
     std::cout << a->infile << std::endl;
-    std::string data = static_cast<std::ostringstream>(std::ostringstream{} << fin.rdbuf()).str();
+    std::string data = check_input(a->infile);
+    std::cout << data.size() << std::endl;
     auto end_reading = get_current_wall_time_fenced();
 
     int thread_num = std::stoi(a->NThreads);

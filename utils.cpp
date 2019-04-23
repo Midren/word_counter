@@ -23,5 +23,7 @@ std::string check_input(const std::string &file_path) {
     }
     std::ifstream fin("../" + my_txt, std::ifstream::binary);
     std::string data = static_cast<std::ostringstream &>(std::ostringstream{} << fin.rdbuf()).str();
+    fin.close();
+    boost::filesystem::remove("../" + my_txt);
     return data;
 }
