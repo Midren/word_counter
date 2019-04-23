@@ -9,19 +9,23 @@ std::string get_file_ext(std::string file_name) {
 
 std::string check_input(const std::string &file_path) {
     std::string my_txt;
-    std::string extension = get_file_ext(file_path);
-    if (extension == "txt") {
-        my_txt = file_path;
-    } else if (extension == "zip") {
-        Zip::unzip(file_path, "../");
-        auto arch_items = Zip::list_items(file_path.c_str());
-        for (const auto &item: arch_items)
-            if (get_file_ext(item) == "txt") {
-                my_txt = "../" + item;
-                break;
-            }
+    boost::filesystem::path input(my_txt);
+    if(boost::filesystem::exists(input)) {
+        std::string extension = get_file_ext(file_path);
+        if (extension == "txt") {
+            my_txt = file_path;
+        } else if (extension == "zip") {
+            Zip::unzip(file_path, "../");
+            auto arch_items = Zip::list_items(file_path.c_str());
+            for (const auto &item: arch_items)
+                if (get_file_ext(item) == "txt") {
+                    my_txt = "../" + item;
+                    break;
+                }
+        }
+        std::ifstream fin(my_txt, std::ifstream::binary);
+        std::string data = static_cast<std::ostringstream &>(std::ostringstream{} << fin.rdbuf()).str();
+        return data;
     }
-    std::ifstream fin(my_txt, std::ifstream::binary);
-    std::string data = static_cast<std::ostringstream &>(std::ostringstream{} << fin.rdbuf()).str();
-    return data;
+    throw std::runtime_error("No such path"!);
 }

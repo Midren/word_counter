@@ -41,7 +41,7 @@ bool Zip::unzip(std::string zipFile, std::string ExtractPath) {
         archive_write_disk_set_standard_lookup(ext);
         boost::filesystem::current_path(zip.parent_path());
         if ((r = archive_read_open_filename(a, zip.filename().c_str(), 10240)))
-            throw std::invalid_argument("Can`t open this type of archive");
+            throw std::runtime_error("Can`t open this type of archive");
         for (;;) {
             r = archive_read_next_header(a, &entry);
             if (r == ARCHIVE_EOF)
