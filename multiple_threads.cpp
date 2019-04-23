@@ -108,8 +108,12 @@ inline uint64_t to_us(const D &d) {
 }
 
 
-int main() {
-    auto a = get_intArgs("../config.dat");
+int main(int argc, char *argv[]) {
+    if (argc < 2)
+        auto a = get_intArgs("config.dat");
+    else if (argc == 2){
+        auto a = get_intArgs(argv[1]);
+    }
     ConcurrentQueue<std::vector<std::string>> words_queue;
     ConcurrentQueue<wMap> map_queue;
     wMap count;
@@ -139,7 +143,7 @@ int main() {
         threads[i] = std::thread(merge_maps, std::ref(map_queue));
     }
 
-    map_queue.push(wMap {});
+    map_queue.push(wMap{});
     for (int i = 0; i < thread_num; i++) {
         threads[i].join();
     }
