@@ -114,6 +114,8 @@ int main(int argc, char *argv[]) {
         a = get_intArgs("config.dat");
     else if (argc == 2) {
         a = get_intArgs(argv[1]);
+    } else {
+        std::cout << "Invalid input: ./multiple_threads <path to config>" << std::endl;
     }
     ConcurrentQueue<std::vector<std::string>> words_queue;
     ConcurrentQueue<wMap> map_queue;
