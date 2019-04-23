@@ -15,9 +15,16 @@ private:
 public:
     ConcurrentQueue() = default;
 
-    void push(T element);
+    void push(const T &element);
+
+    void push(T &&element);
 
     T pop();
+
+    size_t size() {
+        std::unique_lock<std::mutex> locker(deque_mutex);
+        return data.size();
+    }
 };
 
 #include "concurrent_queue.cpp"
