@@ -18,6 +18,7 @@ public:
     void push(T element);
 
     T pop();
+    
 };
 
 #include "concurrent_queue.cpp"

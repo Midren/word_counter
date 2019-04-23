@@ -25,7 +25,6 @@ void split_to_words(std::string &data, ConcurrentQueue<std::vector<std::string>>
         if (s.length() > 1 && any_str(s)) {
             words_vec.push_back(move(s));
             if (words_vec.size() == 1024) {
-                //TODO: Add move
                 words_queue.push(words_vec);
                 words_vec.clear();
             }
@@ -64,8 +63,8 @@ void merge_maps(ConcurrentQueue<std::map<std::string, size_t>> &queue) {
             queue.push(snd);
             return;
         }
-        for (auto i = fst.begin(); i != fst.end(); ++i) {
-            snd[i->first] += i->second;
+        for (auto & i : fst) {
+            snd[i.first] += i.second;
         }
         queue.push(snd);
     }
@@ -74,10 +73,10 @@ void merge_maps(ConcurrentQueue<std::map<std::string, size_t>> &queue) {
 int main() {
     ConcurrentQueue<std::vector<std::string>> words_queue;
     ConcurrentQueue<std::map<std::string, size_t >> map_queue;
-    std::map<std::string, size_t> count;
 
-    std::ifstream fin("../data/data.txt", std::ifstream::binary);
-    std::string data = static_cast<std::ostringstream &>(std::ostringstream{} << fin.rdbuf()).str();
+    std::map<std::string, size_t> count;
+    std::string file = "../data/data.tar";
+    std::string data = check_input(file);
 
     constexpr int thread_num = 8;
     int merge_threads_num = std::ceil(thread_num / 4.0);
@@ -104,7 +103,7 @@ int main() {
     }
 
     std::ofstream fout("result.txt");
-    for (auto x: res) {
+    for (const auto& x: res) {
         fout << x.first << "\t:\t" << x.second << std::endl;
     }
 }
