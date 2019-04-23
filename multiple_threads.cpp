@@ -71,14 +71,15 @@ void count_words(ConcurrentQueue<std::vector<std::string>> &words_queue,
 void merge_maps(ConcurrentQueue<wMap> &queue) {
     wMap fst, snd;
     for (;;) {
-        fst = queue.pop();
-        snd = queue.pop();
+        auto tmp = queue.double_pop();
+        fst = tmp.first;
+        snd = tmp.second;
         if (fst.empty() || snd.empty()) {
-            queue.push(fst);
-            queue.push(snd);
-            if (queue.size() == 2) {
-                return;
+            if (queue.size() == 0) {
+                queue.double_push(fst, snd);
+                break;
             } else {
+                queue.double_push(fst, snd);
                 continue;
             }
         }
@@ -122,13 +123,11 @@ int main(int argc, char *argv[]) {
     wMap count;
 
     auto start_reading = get_current_wall_time_fenced();
-    std::cout << a->infile << std::endl;
     std::string data = check_input(a->infile);
-    std::cout << data.size() << std::endl;
     auto end_reading = get_current_wall_time_fenced();
 
     int thread_num = std::stoi(a->NThreads);
-    std::cout << a->NThreads << std::endl;
+
     int merge_threads_num = std::floor(thread_num / 4.0);
     std::vector<std::thread> threads(thread_num);
 
@@ -166,23 +165,21 @@ int main(int argc, char *argv[]) {
         return x.first < y.first;
     });
     std::ofstream fout1(a->out_by_a);
-    std::cout << a->out_by_a << std::endl;
     for (auto x: tmp) {
         fout1 << x.first << "\t:\t" << x.second << std::endl;
     }
     std::sort(tmp.begin(), tmp.end(), [](auto x, auto y) {
-        return x.second < y.second;
+        return x.second > y.second;
     });
     std::ofstream fout2(a->out_by_n);
-    std::cout << a->out_by_a << std::endl;
     for (auto x: tmp) {
         fout2 << x.first << "\t:\t" << x.second << std::endl;
     }
     auto end_writing = get_current_wall_time_fenced();
 
 
-    std::cout << "Loading: " << to_us(end_reading - start_reading) << std::endl
+    std::cout << "Total: " << to_us(end_writing - start_reading) << std::endl
               << "Analyzing: " << to_us(end_counting - start_counting) << std::endl
-              << "Total: " << to_us(end_writing - start_reading) << std::endl;
+              << "Loading: " << to_us(end_reading - start_reading) << std::endl;
 }
 

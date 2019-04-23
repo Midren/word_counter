@@ -4,14 +4,14 @@ if [ "$#" -ne 4 ]; then
     echo "Example of usage:"
     echo "./itos_exp <number of repetitions> <path single thread exe> <path multithread exe> <path to file>"
 else
-    printf "infile=\"$4\"\nout_by_a=\"res_a.txt\"\nout_by_n=\"res_n.txt\"\nthreads=4\n" > config.dat
-    ./$2 $4 > etalon_a.txt
+    printf "infile=$4\nout_by_a=res_a.txt\nout_by_n=res_n.txt\nthreads=4\n" > config.dat
+    ./$3 config.dat > etalon_a.txt
     mv res_a.txt etalon_a.txt
     mv res_n.txt etalon_n.txt
     gt=1000000
     for i in `seq 1 $1`;
     do
-        t=$(./tmp.sh config.dat)
+        t=$(./$3 config.dat)
         IFS=" "
         read -ra time <<< "$t"
         t=${time[1]}
@@ -32,6 +32,5 @@ else
         gt=$(($t >$gt ? $gt:$t ))
     done
     echo Time is $gt
-    rm etalon_a.txt
-    rm etalon_n.txt
+    rm etalon_a.txt etalon_n.txt res_a.txt res_n.txt
 fi
