@@ -124,11 +124,9 @@ int main(int argc, char *argv[]) {
 
     auto start_reading = get_current_wall_time_fenced();
     std::string data = check_input(a->infile);
-    std::cout << data.size() << std::endl;
     auto end_reading = get_current_wall_time_fenced();
 
     int thread_num = std::stoi(a->NThreads);
-    std::cout << a->NThreads << std::endl;
     int merge_threads_num = std::floor(thread_num / 4.0);
     std::vector<std::thread> threads(thread_num);
 

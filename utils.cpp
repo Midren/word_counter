@@ -27,5 +27,5 @@ std::string check_input(const std::string &file_path) {
         std::string data = static_cast<std::ostringstream &>(std::ostringstream{} << fin.rdbuf()).str();
         return data;
     }
-    throw std::runtime_error("No such path"!);
+    throw std::runtime_error("No file for input!");
 }
