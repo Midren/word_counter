@@ -72,20 +72,24 @@ int main(int argc, char *argv[]) {
     std::string dir = "../tmp/";
     unzip_files(dir, a->infile);
 
-    std::vector<std::pair<std::string, size_t>> tmp;
-
+    std::map<std::string, size_t> words_counter;
     auto start_counting = get_current_wall_time_fenced();
     boost::filesystem::recursive_directory_iterator it(dir), end;
     for (auto &entry: boost::make_iterator_range(it, end)) {
         std::string previous = entry.path().string();
         std::string data = check_input(previous);
         auto words_vec = split_to_words(data);
-        auto words_counter = count_words(words_vec);
-        for (auto x: words_counter) {
-            tmp.emplace_back(x.first, x.second);
+        auto word_counter = count_words(words_vec);
+        for (auto item : word_counter) {
+            words_counter[item.first] += item.second;
         }
     }
     auto end_counting = get_current_wall_time_fenced();
+
+    std::vector<std::pair<std::string, size_t>> tmp;
+    for (auto x: words_counter) {
+        tmp.emplace_back(x.first, x.second);
+    }
 
     std::sort(tmp.begin(), tmp.end(), [](auto x, auto y) {
         return x.first < y.first;
