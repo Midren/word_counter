@@ -12,7 +12,7 @@ Attributes *get_intArgs(const std::string &filename) {
     threads;
 */
     auto *attributes = new Attributes;
-    std::map<std::string, std::string *> conf_attributes{{"infile",   &attributes->infile},
+    std::map<std::string, std::string *> conf_attributes{{"in_dir",   &attributes->infile},
                                                          {"out_by_a", &attributes->out_by_a},
                                                          {"out_by_n", &attributes->out_by_n},
                                                          {"threads",  &attributes->NThreads}};

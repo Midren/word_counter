@@ -5,6 +5,7 @@
 #include <cmath>
 #include <thread>
 #include <unordered_map>
+
 #include "config_parser.h"
 
 #include "concurrent_queue.h"
@@ -131,20 +132,12 @@ int main(int argc, char *argv[]) {
     for (int i = thread_num - merge_threads_num; i < thread_num; i++)
         threads[i] = std::thread(merge_maps, std::ref(map_queue));
 
-//    std::string data = check_input(a->infile);
-    boost::filesystem::path dir = a->infile;
-    boost::filesystem::recursive_directory_iterator it(dir), end;
-
-    std::vector<std::string> files;
-    for (auto &entry: boost::make_iterator_range(it, end)) {
-        std::string previous = entry.path().string();
-        Zip::unzip(previous, "../tmp/");
-    }
+    std::string dir = "../tmp/";
+    unzip_files(dir, a->infile);
 
     auto start_counting = get_current_wall_time_fenced();
-    dir = "../tmp/";
-    boost::filesystem::recursive_directory_iterator new_it(dir), new_end;
-    for (auto &entry: boost::make_iterator_range(new_it, new_end)) {
+    boost::filesystem::recursive_directory_iterator it(dir), end;
+    for (auto &entry: boost::make_iterator_range(it, end)) {
         std::string previous = entry.path().string();
         std::string data = check_input(previous);
         split_to_words(data, words_queue);
@@ -157,16 +150,13 @@ int main(int argc, char *argv[]) {
     }
 
     map_queue.push(wMap{});
-    for (int i = 0; i < thread_num; i++) {
+    for (int i = 0; i < thread_num; i++)
         threads[i].join();
-    }
     auto end_counting = get_current_wall_time_fenced();
 
     auto res = map_queue.pop();
-
-    if (res.empty()) {
+    if (res.empty())
         res = map_queue.pop();
-    }
 
     std::vector<std::pair<std::string, size_t>> tmp;
     tmp.reserve(res.size());

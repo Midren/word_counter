@@ -13,4 +13,6 @@ std::string check_input(const std::string &file_name);
 
 std::string get_file_ext(std::string file_name);
 
+void unzip_files(std::string dst, std::string src);
+
 #endif //PARALLEL_READING_UTILS_H

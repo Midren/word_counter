@@ -69,20 +69,24 @@ int main(int argc, char *argv[]) {
         std::cerr << "Invalid input: ./multiple_threads <path to config>" << std::endl;
         return -1;
     }
-    auto start_reading = get_current_wall_time_fenced();
-    std::string data = check_input(a->infile);
-    auto end_reading = get_current_wall_time_fenced();
-
-    auto start_counting = get_current_wall_time_fenced();
-    auto words_vec = split_to_words(data);
-    auto words_counter = count_words(words_vec);
-    auto end_counting = get_current_wall_time_fenced();
+    std::string dir = "../tmp/";
+    unzip_files(dir, a->infile);
 
     std::vector<std::pair<std::string, size_t>> tmp;
-    tmp.reserve(words_counter.size());
-    for (auto x: words_counter) {
-        tmp.emplace_back(x.first, x.second);
+
+    auto start_counting = get_current_wall_time_fenced();
+    boost::filesystem::recursive_directory_iterator it(dir), end;
+    for (auto &entry: boost::make_iterator_range(it, end)) {
+        std::string previous = entry.path().string();
+        std::string data = check_input(previous);
+        auto words_vec = split_to_words(data);
+        auto words_counter = count_words(words_vec);
+        for (auto x: words_counter) {
+            tmp.emplace_back(x.first, x.second);
+        }
     }
+    auto end_counting = get_current_wall_time_fenced();
+
     std::sort(tmp.begin(), tmp.end(), [](auto x, auto y) {
         return x.first < y.first;
     });
@@ -99,7 +103,5 @@ int main(int argc, char *argv[]) {
     }
     auto end_writing = get_current_wall_time_fenced();
 
-    std::cout << "Total: " << to_us(end_writing - start_reading) << std::endl
-              << "Analyzing: " << to_us(end_counting - start_counting) << std::endl
-              << "Loading: " << to_us(end_reading - start_reading) << std::endl;
+    std::cout << "Analyzing: " << to_us(end_counting - start_counting) << std::endl;
 }

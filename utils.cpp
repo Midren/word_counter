@@ -30,3 +30,14 @@ std::string check_input(const std::string &file_path) {
         throw std::runtime_error("No file for input!");
     }
 }
+
+void unzip_files(std::string dst, std::string src) {
+    boost::filesystem::path dir = src;
+    boost::filesystem::recursive_directory_iterator it(dir), end;
+
+    std::vector<std::string> files;
+    for (auto &entry: boost::make_iterator_range(it, end)) {
+        std::string previous = entry.path().string();
+        Zip::unzip(previous, dst);
+    }
+}
