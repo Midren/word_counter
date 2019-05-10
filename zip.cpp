@@ -25,6 +25,7 @@ int copy_data(struct archive *ar, struct archive *aw) {
 
 bool Zip::unzip(std::string zipFile, std::string ExtractPath) {
     boost::filesystem::path zip(zipFile);
+//    std::vector<std::string> files;
     if (boost::filesystem::exists(zip)) {
         boost::filesystem::path path(ExtractPath);
         boost::filesystem::path currentDir = boost::filesystem::current_path();
@@ -40,11 +41,12 @@ bool Zip::unzip(std::string zipFile, std::string ExtractPath) {
         archive_write_disk_set_options(ext, flags);
         archive_write_disk_set_standard_lookup(ext);
         boost::filesystem::current_path(zip.parent_path());
-        std::cout << zip.filename().string() << std::endl;
         if ((r = archive_read_open_filename(a, zip.filename().c_str(), 10240))) {
-            if(boost::filesystem::extension(zip.filename()) == ".txt") {
-                boost::filesystem::copy_file(zip, path.string()+zip.filename().string(), boost::filesystem::copy_option::overwrite_if_exists);
-                return 0;
+            if (boost::filesystem::extension(zip.filename()) == ".txt") {
+                boost::filesystem::copy_file(zip, path.string() + zip.filename().string(),
+                                             boost::filesystem::copy_option::overwrite_if_exists);
+                boost::filesystem::current_path(currentDir);
+                return true;
             }
             throw std::runtime_error("Can`t open this type of archive");
         }
@@ -57,6 +59,7 @@ bool Zip::unzip(std::string zipFile, std::string ExtractPath) {
             if (boost::filesystem::exists(path) && boost::filesystem::is_directory(path)) {
                 std::string newPath = path.string() + "/" + std::string(archive_entry_pathname(entry));
                 archive_entry_set_pathname(entry, newPath.c_str());
+//                files.push_back(newPath);
             }
             r = archive_write_header(ext, entry);
             if (r < ARCHIVE_OK)

@@ -122,9 +122,16 @@ int main(int argc, char *argv[]) {
     ConcurrentQueue<wMap> map_queue;
     wMap count;
 
-    auto start_reading = get_current_wall_time_fenced();
+    int thread_num = std::stoi(a->NThreads);
+    int merge_threads_num = std::floor(thread_num / 4.0);
+    std::vector<std::thread> threads(thread_num);
+
+    for (int i = 0; i < thread_num - merge_threads_num; i++)
+        threads[i] = std::thread(count_words, std::ref(words_queue), std::ref(map_queue));
+    for (int i = thread_num - merge_threads_num; i < thread_num; i++)
+        threads[i] = std::thread(merge_maps, std::ref(map_queue));
+
 //    std::string data = check_input(a->infile);
-    std::cout << ": " << a->infile << std::endl;
     boost::filesystem::path dir = a->infile;
     boost::filesystem::recursive_directory_iterator it(dir), end;
 
@@ -132,64 +139,55 @@ int main(int argc, char *argv[]) {
     for (auto &entry: boost::make_iterator_range(it, end)) {
         std::string previous = entry.path().string();
         Zip::unzip(previous, "../tmp/");
-        std::cout << previous << std::endl;
-//        split_to_words(data, words_queue);
     }
-    auto end_reading = get_current_wall_time_fenced();
 
-//    int thread_num = std::stoi(a->NThreads);
-//    int merge_threads_num = std::floor(thread_num / 4.0);
-//    std::vector<std::thread> threads(thread_num);
-//
-//    for (int i = 0; i < thread_num - merge_threads_num; i++)
-//        threads[i] = std::thread(count_words, std::ref(words_queue), std::ref(map_queue));
-//    for (int i = thread_num - merge_threads_num; i < thread_num; i++)
-//        threads[i] = std::thread(merge_maps, std::ref(map_queue));
-//
-//    auto start_counting = get_current_wall_time_fenced();
-//
-//    words_queue.push(std::vector<std::string>());
-//    for (int i = 0; i < thread_num - merge_threads_num; i++) {
-//        threads[i].join();
-//        threads[i] = std::thread(merge_maps, std::ref(map_queue));
-//    }
-//
-//    map_queue.push(wMap{});
-//    for (int i = 0; i < thread_num; i++) {
-//        threads[i].join();
-//    }
-//    auto end_counting = get_current_wall_time_fenced();
-//
-//    auto res = map_queue.pop();
-//
-//    if (res.empty()) {
-//        res = map_queue.pop();
-//    }
-//
-//    std::vector<std::pair<std::string, size_t>> tmp;
-//    tmp.reserve(res.size());
-//    for (auto x: res) {
-//        tmp.emplace_back(x.first, x.second);
-//    }
-//    std::sort(tmp.begin(), tmp.end(), [](auto x, auto y) {
-//        return x.first < y.first;
-//    });
-//    std::ofstream fout1(a->out_by_a);
-//    for (auto x: tmp) {
-//        fout1 << x.first << "\t:\t" << x.second << std::endl;
-//    }
-//    std::sort(tmp.begin(), tmp.end(), [](auto x, auto y) {
-//        return x.second > y.second;
-//    });
-//    std::ofstream fout2(a->out_by_n);
-//    for (auto x: tmp) {
-//        fout2 << x.first << "\t:\t" << x.second << std::endl;
-//    }
-//    auto end_writing = get_current_wall_time_fenced();
-//
-//
-//    std::cout << "Total: " << to_us(end_writing - start_reading) << std::endl
-//              << "Analyzing: " << to_us(end_counting - start_counting) << std::endl
-//              << "Loading: " << to_us(end_reading - start_reading) << std::endl;
+    auto start_counting = get_current_wall_time_fenced();
+    dir = "../tmp/";
+    boost::filesystem::recursive_directory_iterator new_it(dir), new_end;
+    for (auto &entry: boost::make_iterator_range(new_it, new_end)) {
+        std::string previous = entry.path().string();
+        std::string data = check_input(previous);
+        split_to_words(data, words_queue);
+    }
+
+    words_queue.push(std::vector<std::string>());
+    for (int i = 0; i < thread_num - merge_threads_num; i++) {
+        threads[i].join();
+        threads[i] = std::thread(merge_maps, std::ref(map_queue));
+    }
+
+    map_queue.push(wMap{});
+    for (int i = 0; i < thread_num; i++) {
+        threads[i].join();
+    }
+    auto end_counting = get_current_wall_time_fenced();
+
+    auto res = map_queue.pop();
+
+    if (res.empty()) {
+        res = map_queue.pop();
+    }
+
+    std::vector<std::pair<std::string, size_t>> tmp;
+    tmp.reserve(res.size());
+    for (auto x: res) {
+        tmp.emplace_back(x.first, x.second);
+    }
+    std::sort(tmp.begin(), tmp.end(), [](auto x, auto y) {
+        return x.first < y.first;
+    });
+    std::ofstream fout1(a->out_by_a);
+    for (auto x: tmp) {
+        fout1 << x.first << "\t:\t" << x.second << std::endl;
+    }
+    std::sort(tmp.begin(), tmp.end(), [](auto x, auto y) {
+        return x.second > y.second;
+    });
+    std::ofstream fout2(a->out_by_n);
+    for (auto x: tmp) {
+        fout2 << x.first << "\t:\t" << x.second << std::endl;
+    }
+
+    std::cout << "Counting: " << to_us(end_counting - start_counting) << std::endl;
 }
 
