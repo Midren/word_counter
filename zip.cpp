@@ -48,6 +48,7 @@ bool Zip::unzip(std::string zipFile, std::string ExtractPath) {
                 boost::filesystem::current_path(currentDir);
                 return true;
             }
+
             throw std::runtime_error("Can`t open this type of archive");
         }
         for (;;) {

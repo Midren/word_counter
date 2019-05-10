@@ -24,7 +24,7 @@ std::string check_input(const std::string &file_path) {
                 }
         }
         std::ifstream fin(my_txt, std::ifstream::binary);
-        std::string data = static_cast<std::ostringstream &>(std::ostringstream{} << fin.rdbuf()).str();
+        std::string data = static_cast<std::ostringstream >(std::ostringstream{} << fin.rdbuf()).str();
         return data;
     } else {
         throw std::runtime_error("No file for input!");
@@ -37,7 +37,17 @@ void unzip_files(std::string dst, std::string src) {
 
     std::vector<std::string> files;
     for (auto &entry: boost::make_iterator_range(it, end)) {
-        std::string previous = entry.path().string();
-        Zip::unzip(previous, dst);
+//        std::cout << entry.path().string() << std::endl;
+        if(boost::filesystem::is_directory(entry.path())){
+            unzip_files(boost::filesystem::canonical(dst).string() + "/", boost::filesystem::canonical(entry.path().string()).string());
+        }
+        else {
+            std::string previous = entry.path().string();
+            try {
+                Zip::unzip(previous, dst);
+            }
+            catch (std::exception &e) {
+            }
+        }
     }
 }

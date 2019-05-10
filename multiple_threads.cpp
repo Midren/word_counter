@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
         threads[i] = std::thread(merge_maps, std::ref(map_queue));
 
     std::string dir = "../tmp/";
-    unzip_files(dir, a->infile);
+    unzip_files(boost::filesystem::canonical(dir).string() + "/", boost::filesystem::canonical(a->infile).string());
 
     auto start_counting = get_current_wall_time_fenced();
     boost::filesystem::recursive_directory_iterator it(dir), end;
