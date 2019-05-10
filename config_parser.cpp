@@ -3,6 +3,7 @@
 //
 
 #include "config_parser.h"
+#include <iostream>
 Attributes *get_intArgs(const std::string &filename) {
 /*You need to pass parameters in such way
  *  infile;
@@ -18,6 +19,7 @@ Attributes *get_intArgs(const std::string &filename) {
     std::ifstream f(filename);
     std::string line;
     while (getline(f, line)) {
+        std::cout << line << std::endl;
         line.erase(std::remove_if(line.begin(), line.end(), isspace), line.end());
         if (line[0] == '#' || line.empty()) {
             continue;
