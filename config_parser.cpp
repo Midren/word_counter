@@ -4,6 +4,7 @@
 
 #include "config_parser.h"
 #include <iostream>
+
 Attributes *get_intArgs(const std::string &filename) {
 /*You need to pass parameters in such way
  *  infile;
@@ -26,6 +27,9 @@ Attributes *get_intArgs(const std::string &filename) {
         size_t half = line.find('=');
         std::string name = line.substr(0, half);
         std::string value = line.substr(half + 1);
+        if (!std::any_of(conf_attributes.begin(), conf_attributes.end(), [name](auto x) { return x.first == name; })) {
+            throw std::invalid_argument("Invalid config argument!");
+        }
         try {
             *conf_attributes[name] = value;
         }
