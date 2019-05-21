@@ -33,11 +33,9 @@ std::string check_input(const std::string &file_path) {
 
 void unzip_files(std::string dst, std::string src) {
     boost::filesystem::path dir = src;
-    boost::filesystem::recursive_directory_iterator it(dir), end;
-
+    boost::filesystem::directory_iterator it(dir), end;
     std::vector<std::string> files;
     for (auto &entry: boost::make_iterator_range(it, end)) {
-//        std::cout << entry.path().string() << std::endl;
         if(boost::filesystem::is_directory(entry.path())){
             unzip_files(boost::filesystem::canonical(dst).string() + "/", boost::filesystem::canonical(entry.path().string()).string());
         }

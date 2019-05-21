@@ -126,16 +126,17 @@ int main(int argc, char *argv[]) {
     int thread_num = std::stoi(a->NThreads);
     int merge_threads_num = std::floor(thread_num / 4.0);
     std::vector<std::thread> threads(thread_num);
-
     for (int i = 0; i < thread_num - merge_threads_num; i++)
         threads[i] = std::thread(count_words, std::ref(words_queue), std::ref(map_queue));
     for (int i = thread_num - merge_threads_num; i < thread_num; i++)
         threads[i] = std::thread(merge_maps, std::ref(map_queue));
 
     std::string dir = "../tmp/";
-    unzip_files(boost::filesystem::canonical(dir).string() + "/", boost::filesystem::canonical(a->infile).string());
-
     auto start_counting = get_current_wall_time_fenced();
+    boost::filesystem::path currentDir = boost::filesystem::current_path();
+    unzip_files(boost::filesystem::canonical(dir).string() + "/", boost::filesystem::canonical(a->infile).string());
+    boost::filesystem::current_path(currentDir);
+    std::cout << "Started counting words!" << std::endl;
     boost::filesystem::recursive_directory_iterator it(dir), end;
     for (auto &entry: boost::make_iterator_range(it, end)) {
         std::string previous = entry.path().string();

@@ -69,12 +69,13 @@ int main(int argc, char *argv[]) {
         std::cerr << "Invalid input: ./multiple_threads <path to config>" << std::endl;
         return -1;
     }
-    std::string dir = "../tmp/";
+    std::string dir = "../tmp";
+    boost::filesystem::path currentDir = boost::filesystem::current_path();
     unzip_files(dir, a->infile);
-
+    boost::filesystem::current_path(currentDir);
     std::map<std::string, size_t> words_counter;
     auto start_counting = get_current_wall_time_fenced();
-    boost::filesystem::recursive_directory_iterator it(dir), end;
+    boost::filesystem::directory_iterator it(dir), end;
     for (auto &entry: boost::make_iterator_range(it, end)) {
         std::string previous = entry.path().string();
         std::string data = check_input(previous);
