@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
     for (int i = thread_num - merge_threads_num; i < thread_num; i++)
         threads[i] = std::thread(merge_maps, std::ref(map_queue));
 
-    std::string dir = "../tmp/";
+    std::string dir = "../.tmp/";
     boost::filesystem::create_directory(dir);
     auto start_counting = get_current_wall_time_fenced();
     boost::filesystem::path currentDir = boost::filesystem::current_path();
