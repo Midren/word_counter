@@ -21,6 +21,8 @@ public:
 
     void push(T &&element);
 
+    void unlimited_push(T &&element);
+
     std::pair<T, T> double_pop();
 
     T pop();
