@@ -121,7 +121,7 @@ int main(int argc, char *argv[]) {
     else if (argc == 2) {
         a = get_intArgs(argv[1]);
     } else {
-        std::cout << "Invalid input: ./multiple_threads <path to config>" << std::endl;
+        std::cout << "Invalid input: ./multiple_threads [path to config]" << std::endl;
     }
     ConcurrentQueue<std::vector<std::string>> words_queue;
     ConcurrentQueue<wMap> map_queue;
@@ -136,20 +136,21 @@ int main(int argc, char *argv[]) {
         threads[i] = std::thread(merge_maps, std::ref(map_queue));
 
     std::string dir = "../tmp/";
+    boost::filesystem::create_directory(dir);
     auto start_counting = get_current_wall_time_fenced();
     boost::filesystem::path currentDir = boost::filesystem::current_path();
-    //	unzip_files(boost::filesystem::canonical(dir).string() + "/", boost::filesystem::canonical(a->infile).string());
+    unzip_files(boost::filesystem::canonical(dir).string() + "/", boost::filesystem::canonical(a->infile).string());
     boost::filesystem::current_path(currentDir);
     std::cout << "Started counting words!" << std::endl;
     boost::filesystem::recursive_directory_iterator it(dir), end;
-    size_t cnt = 0;
     for (auto &entry: boost::make_iterator_range(it, end)) {
         std::string previous = entry.path().string();
         std::string data = check_input(previous);
         split_to_words(data, words_queue);
-        if (cnt++ % 100 == 0)
-            std::cout << cnt << std::endl;
     }
+    boost::filesystem::remove_all(dir);
+
+
     std::cout << "Started merging " << std::endl;
     words_queue.push(std::vector<std::string>());
     for (int i = 0; i < thread_num - merge_threads_num; i++)
@@ -163,6 +164,7 @@ int main(int argc, char *argv[]) {
     auto res = map_queue.pop();
     if (res.empty())
         res = map_queue.pop();
+ 
 
     std::vector<std::pair<std::string, size_t>> tmp;
     tmp.reserve(res.size());
