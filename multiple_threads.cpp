@@ -39,16 +39,16 @@ void split_to_words(std::string &data, ConcurrentQueue<std::vector<std::string>>
     constexpr int words_block = 2048;
 
     for (auto &&x: words) {
-	if (x.str().length() >= 1) {
-        words_vec.push_back(move(x.str()));
-        if (words_vec.size() == words_block) {
-            words_queue.push(std::move(words_vec));
-            words_vec = std::vector<std::string>();
-            words_vec.reserve(words_block);
+        if (x.str().length() >= 1) {
+            words_vec.push_back(move(x.str()));
+            if (words_vec.size() == words_block) {
+                words_queue.push(std::move(words_vec));
+                words_vec = std::vector<std::string>();
+                words_vec.reserve(words_block);
+            }
         }
-	}
     }
-    if(!words_vec.empty())
+    if (!words_vec.empty())
         words_queue.push(words_vec);
 }
 
@@ -57,13 +57,13 @@ void count_words(ConcurrentQueue<std::vector<std::string>> &words_queue,
     std::vector<std::string> words;
     for (;;) {
         words = words_queue.pop();
-	//std::cout << "Counting " << words_queue.size() << std::endl;
+        //std::cout << "Counting " << words_queue.size() << std::endl;
         if (words.empty()) {
-	    std::cout << "End working " << words.size() << std::endl;
+//            std::cout << "End working " << words.size() << std::endl;
             words_queue.push(std::move(words));
             return;
         }
-	//std::cout << "Counting push " << words_queue.size() << std::endl;
+        //std::cout << "Counting push " << words_queue.size() << std::endl;
         wMap cnt;
         for (auto &word: words) {
             std::string s = boost::locale::fold_case(boost::locale::normalize(word));
@@ -71,37 +71,27 @@ void count_words(ConcurrentQueue<std::vector<std::string>> &words_queue,
                 ++cnt[s];
             }
         }
-        map_queue.push(std::move(cnt));
+        if (!cnt.empty())
+            map_queue.push(std::move(cnt));
     }
     //std::cout << "End working" << std::endl;
 }
 
 void merge_maps(ConcurrentQueue<wMap> &queue) {
-    wMap fst, snd;
+    wMap res;
     for (;;) {
-	//std::cout << "Merge " << queue.size() << std::endl;
-        auto tmp = queue.double_pop();
-	//std::cout << "Merge popped " << queue.size() << std::endl;
-        fst = tmp.first;
-        snd = tmp.second;
-        if (fst.empty() || snd.empty()) {
-            if (queue.size() == 0) {
-		queue.unlimited_push(std::move(fst));
-		queue.unlimited_push(std::move(snd));
-                //queue.double_push(fst, snd);
-                break;
-            } else {
-		queue.unlimited_push(std::move(fst));
-		queue.unlimited_push(std::move(snd));
-                //queue.double_push(fst, snd);
-                continue;
-            }
+//        std::cout << "Merge " << queue.size() << std::endl;
+        auto tmp = queue.pop();
+//        std::cout << "Merge popped " << queue.size() << std::endl;
+        if (tmp.empty()) {
+//            std::cout << "Poison pill" << std::endl;
+            queue.unlimited_push(std::move(res));
+            queue.unlimited_push(std::move(tmp));
+            break;
         }
-        for (auto &el : fst) {
-            snd[el.first] += el.second;
+        for (auto &el : tmp) {
+            res[el.first] += el.second;
         }
-        queue.unlimited_push(std::move(snd));
-	//std::cout << "Merge pushed " << queue.size() << std::endl;
     }
 }
 
@@ -138,7 +128,7 @@ int main(int argc, char *argv[]) {
     wMap count;
 
     int thread_num = std::stoi(a->NThreads);
-    int merge_threads_num = std::floor(thread_num / 4.0);
+    int merge_threads_num = std::floor(thread_num / 3.0);
     std::vector<std::thread> threads(thread_num);
     for (int i = 0; i < thread_num - merge_threads_num; i++)
         threads[i] = std::thread(count_words, std::ref(words_queue), std::ref(map_queue));
@@ -157,18 +147,16 @@ int main(int argc, char *argv[]) {
         std::string previous = entry.path().string();
         std::string data = check_input(previous);
         split_to_words(data, words_queue);
-	if(cnt++ % 100 == 0) 
-	    std::cout << cnt << std::endl;
+        if (cnt++ % 100 == 0)
+            std::cout << cnt << std::endl;
     }
-    std::cout << "Stareted merging " << std::endl;
+    std::cout << "Started merging " << std::endl;
     words_queue.push(std::vector<std::string>());
-    for (int i = 0; i < thread_num - merge_threads_num; i++) {
+    for (int i = 0; i < thread_num - merge_threads_num; i++)
         threads[i].join();
-        threads[i] = std::thread(merge_maps, std::ref(map_queue));
-    }
 
     map_queue.push(wMap{});
-    for (int i = 0; i < thread_num; i++)
+    for (int i = thread_num - merge_threads_num; i < thread_num; i++)
         threads[i].join();
     auto end_counting = get_current_wall_time_fenced();
 

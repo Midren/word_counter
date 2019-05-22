@@ -1,5 +1,4 @@
 .idea/
 cmake-*
-utils.cpp
 tmp/*
 data/*
